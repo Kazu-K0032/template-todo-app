@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { CreateTaskRequest } from "@/types/task.types";
+import type { CreateTaskRequest } from "@/types/task.types";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const accountId = searchParams.get("accountId");
+    // ページ番号
+    const page = parseInt(searchParams.get("page") || "1");
+    // n個/pageで取得する件数
+    const limit = parseInt(searchParams.get("limit") || "8");
 
     if (!accountId) {
       return NextResponse.json(
@@ -23,13 +27,28 @@ export async function GET(request: NextRequest) {
         deletedAt: null,
       },
       orderBy: {
-        createdAt: "desc",
+        updatedAt: "desc",
       },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+
+    const total = await prisma.task.count({
+      where: {
+        accountId,
+        deletedAt: null,
+      }
+    })
 
     return NextResponse.json({
       success: true,
       tasks,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      }
     });
   } catch (error) {
     console.error("タスク取得エラー:", error);

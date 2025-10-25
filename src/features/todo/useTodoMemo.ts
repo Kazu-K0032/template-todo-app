@@ -1,71 +1,39 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { taskClient } from "@/lib/client-task";
+import { useState, useCallback } from "react";
+import { message } from "antd";
+import { createTask, updateTask, deleteTask, useTasksWithPagination, revalidateTasks } from "@/lib/client-tasks";
 import { TodoItem } from "./TodoMemo.types";
 
 interface UseTodoMemoProps {
   accountId?: string;
+  page?: number;
+  limit?: number;
 }
 
-export const useTodoMemo = ({ accountId }: UseTodoMemoProps = {}) => {
-  const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const useTodoMemo = ({
+  accountId,
+  page = 1,
+  limit = 8
+}: UseTodoMemoProps = {}) => {
   const [selectedTodo, setSelectedTodo] = useState<TodoItem | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingTodo, setEditingTodo] = useState<TodoItem | null>(null);
 
-  // タスクの読み込み
-  const loadTodos = useCallback(async () => {
-    if (!accountId) {
-      setTodos([]);
-      setIsLoading(false);
-      return;
-    }
+  // フォーム状態管理
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
-    try {
-      setIsLoading(true);
-      setError(null);
-      const fetchedTodos = await taskClient.getTasksByAccount(accountId);
-      setTodos(fetchedTodos);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "タスクの読み込みに失敗しました"
-      );
-      console.error("タスク読み込みエラー:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [accountId]);
+  // ページネーション対応のデータ取得
+  const { tasks: todos, pagination, isLoading, error } = useTasksWithPagination(
+    accountId,
+    page,
+    limit
+  );
 
-  useEffect(() => {
-    loadTodos();
-  }, [loadTodos]);
-
-  /**
-   * 新しいTODOを追加する
-   * @param title TODOのタイトル
-   * @param description TODOの詳細
-   */
-  const addTodo = async (title: string, description: string) => {
-    if (!accountId) return;
-
-    try {
-      const newTodo = await taskClient.createTask({
-        title,
-        description,
-        accountId,
-      });
-      setTodos([newTodo, ...todos]);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "タスクの作成に失敗しました"
-      );
-      console.error("タスク作成エラー:", err);
-    }
-  };
 
   /**
    * TODOの完了状態を切り替える
@@ -73,58 +41,24 @@ export const useTodoMemo = ({ accountId }: UseTodoMemoProps = {}) => {
    */
   const toggleTodo = async (id: string) => {
     try {
-      const todo = todos.find((t) => t.id === id);
+      const todo = todos.find((t: TodoItem) => t.id === id);
       if (!todo) return;
 
       const newStatus = todo.status === "DONE" ? "TODO" : "DONE";
-      const updatedTodo = await taskClient.updateTask(id, {
+      await updateTask(id, {
         status: newStatus,
       });
+      if (accountId) {
+        await revalidateTasks(accountId, page, limit);
+      }
 
-      setTodos(todos.map((t) => (t.id === id ? updatedTodo : t)));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "タスクの更新に失敗しました"
-      );
       console.error("タスク更新エラー:", err);
+      throw err;
     }
   };
 
-  /**
-   * TODOを削除する
-   * @param id TODOのID
-   */
-  const deleteTodo = async (id: string) => {
-    try {
-      await taskClient.deleteTask(id);
-      setTodos(todos.filter((todo) => todo.id !== id));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "タスクの削除に失敗しました"
-      );
-      console.error("タスク削除エラー:", err);
-    }
-  };
 
-  /**
-   * 完了済みTODOを削除する
-   */
-  const deleteCompletedTodos = async () => {
-    try {
-      const completedTodos = todos.filter((todo) => todo.status === "DONE");
-      await Promise.all(
-        completedTodos.map((todo) => taskClient.deleteTask(todo.id))
-      );
-      setTodos(todos.filter((todo) => todo.status !== "DONE"));
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "完了済みタスクの削除に失敗しました"
-      );
-      console.error("完了済みタスク削除エラー:", err);
-    }
-  };
 
   /**
    * TODOの詳細を表示する
@@ -144,28 +78,6 @@ export const useTodoMemo = ({ accountId }: UseTodoMemoProps = {}) => {
     setIsEditModalVisible(true);
   };
 
-  /**
-   * TODOを更新する
-   * @param id TODOのID
-   * @param title 新しいタイトル
-   * @param description 新しい詳細
-   */
-  const updateTodo = async (id: string, title: string, description: string) => {
-    try {
-      const updatedTodo = await taskClient.updateTask(id, {
-        title,
-        description,
-      });
-      setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
-      setIsEditModalVisible(false);
-      setEditingTodo(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "タスクの更新に失敗しました"
-      );
-      console.error("タスク更新エラー:", err);
-    }
-  };
 
   /**
    * モーダルを閉じる
@@ -177,22 +89,130 @@ export const useTodoMemo = ({ accountId }: UseTodoMemoProps = {}) => {
     setEditingTodo(null);
   };
 
+  // TodoMemo専用のハンドラー関数
+  const handleAddTodo = useCallback(async () => {
+    if (!newTitle.trim()) {
+      message.warning("タイトルを入力してください");
+      return;
+    }
+    if (!accountId) return;
+
+    try {
+      await createTask({
+        title: newTitle,
+        description: newDescription,
+        accountId,
+      });
+      if (accountId) {
+        await revalidateTasks(accountId, page, limit);
+      }
+      setNewTitle("");
+      setNewDescription("");
+      message.success("TODOを追加しました");
+    } catch (err) {
+      console.error("タスク作成エラー:", err);
+      message.error("TODOの追加に失敗しました");
+    }
+  }, [newTitle, newDescription, accountId, page, limit]);
+
+  const handleEditTodo = useCallback(
+    (todo: TodoItem) => {
+      setEditTitle(todo.title);
+      setEditDescription(todo.description);
+      editTodo(todo);
+    },
+    [editTodo]
+  );
+
+  const handleUpdateTodo = useCallback(async () => {
+    if (!editTitle.trim()) {
+      message.warning("タイトルを入力してください");
+      return;
+    }
+    if (editingTodo) {
+      try {
+        await updateTask(editingTodo.id, {
+          title: editTitle,
+          description: editDescription,
+        });
+        if (accountId) {
+          await revalidateTasks(accountId, page, limit);
+        }
+        setIsEditModalVisible(false);
+        setEditingTodo(null);
+        message.success("TODOを更新しました");
+      } catch (err) {
+        console.error("タスク更新エラー:", err);
+        message.error("TODOの更新に失敗しました");
+      }
+    }
+  }, [editTitle, editDescription, editingTodo, accountId, page, limit]);
+
+  const handleDeleteCompleted = useCallback(async () => {
+    const completedCount = todos.filter(
+      (todo: TodoItem) => todo.status === "DONE"
+    ).length;
+    if (completedCount === 0) {
+      message.info("完了済みのTODOがありません");
+      return;
+    }
+
+    try {
+      const completedTodos = todos.filter((todo: TodoItem) => todo.status === "DONE");
+      await Promise.all(
+        completedTodos.map((todo: TodoItem) => deleteTask(todo.id))
+      );
+      if (accountId) {
+        await revalidateTasks(accountId, page, limit);
+      }
+      message.success(`${completedCount}個の完了済みTODOを削除しました`);
+    } catch (err) {
+      console.error("完了済みタスク削除エラー:", err);
+      message.error("完了済みTODOの削除に失敗しました");
+    }
+  }, [todos, accountId, page, limit]);
+
+  // 完了済みTODO数の計算
+  const completedCount = todos.filter((todo: TodoItem) => todo.status === "DONE").length;
+
+  // deleteTodo関数を実装
+  const deleteTodo = async (id: string) => {
+    try {
+      await deleteTask(id);
+      if (accountId) {
+        await revalidateTasks(accountId, page, limit);
+      }
+    } catch (err) {
+      console.error("タスク削除エラー:", err);
+      message.error("TODOの削除に失敗しました");
+    }
+  };
+
   return {
     todos,
+    pagination,
     isLoading,
-    error,
     selectedTodo,
-    editingTodo,
     isDetailModalVisible,
     isEditModalVisible,
-    addTodo,
     toggleTodo,
     deleteTodo,
-    deleteCompletedTodos,
     showTodoDetail,
-    editTodo,
-    updateTodo,
     closeModals,
-    refetch: loadTodos,
+    // フォーム状態
+    newTitle,
+    setNewTitle,
+    newDescription,
+    setNewDescription,
+    editTitle,
+    setEditTitle,
+    editDescription,
+    setEditDescription,
+    // ハンドラー関数
+    handleAddTodo,
+    handleEditTodo,
+    handleUpdateTodo,
+    handleDeleteCompleted,
+    completedCount,
   };
 };

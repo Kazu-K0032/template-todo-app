@@ -4,6 +4,7 @@ import { TodoCard } from "./TodoCard";
 
 interface TodoListProps {
   todos: TodoItem[];
+  isLoading?: boolean;
   onToggle: (id: string) => void;
   onView: (todo: TodoItem) => void;
   onEdit: (todo: TodoItem) => void;
@@ -12,13 +13,22 @@ interface TodoListProps {
 
 export function TodoList({
   todos,
+  isLoading,
   onToggle,
   onView,
   onEdit,
   onDelete,
 }: TodoListProps) {
   return (
-    <Row gutter={[16, 16]} style={{ minHeight: "400px" }} justify="center">
+    <Row
+      gutter={[16, 16]}
+      style={{
+        minHeight: "400px",
+        opacity: isLoading ? 0.5 : 1,
+        transition: "opacity 0.3s ease"
+      }}
+      justify="center"
+    >
       {todos.map((todo) => (
         <Col
           xs={24}

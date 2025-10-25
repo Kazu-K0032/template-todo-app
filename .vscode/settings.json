@@ -1,0 +1,60 @@
+{
+  /* エディタの基本設定*/
+  "editor.tabSize": 2, // インデントのスペース数
+  "editor.formatOnSave": true, // 保存時に自動フォーマット
+  "editor.formatOnPaste": true, // ペースト時に自動フォーマット
+
+  // 80文字で改行する
+  "editor.wordWrapColumn": 80,
+  // 自動改行を有効にする
+  "editor.wordWrap": "on",
+
+  /* ファイル設定 */
+  "files.autoSave": "afterDelay", // 一定時間後に自動保存
+  "files.autoSaveDelay": 1000, // 自動保存までの待機時間（ミリ秒）
+  "files.insertFinalNewline": true, // ファイル末尾に改行を追加(POSIX準拠)
+  "files.trimTrailingWhitespace": true, // 行末の空白を自動削除
+  "files.eol": "\n", // 改行コードをLF（\n）に統一
+
+  /* 検索設定 */
+  "search.exclude": {
+    // 検索から除外するファイル/フォルダ
+    "**/node_modules": true, // node_modulesを除外
+    "**/bower_components": true, // bower_componentsを除外
+    "**/dist": true, // distフォルダを除外
+    "**/coverage": true // coverageフォルダを除外
+  },
+
+  /* Git設定 */
+  "git.autofetch": true, // 5分ごとに自動フェッチを実行
+  "git.autofetchPeriod": 300, // 自動フェッチの間隔を300秒（5分）に設定
+
+  /* エクスプローラー設定 */
+  "explorer.confirmDelete": false, // ファイル削除時の確認を省略
+  "explorer.confirmDragAndDrop": true, // ドラッグ&ドロップ時の確認を省略
+
+  /* 言語別設定 */
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features", // HTMLのデフォルトフォーマッタ
+    "editor.formatOnSave": true // 保存時にフォーマット
+  },
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features", // CSSのデフォルトフォーマッタ
+    "editor.formatOnSave": true // 保存時にフォーマット
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features", // JavaScriptのデフォルトフォーマッタ
+    "editor.formatOnSave": true // 保存時にフォーマット
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features", // JSONのデフォルトフォーマッタ
+    "editor.formatOnSave": true // 保存時にフォーマット
+  },
+
+  /* その他の便利な設定 */
+  "breadcrumbs.enabled": true, // ファイルのパンくずリストを表示
+  "workbench.colorTheme": "Default Dark Modern", // テーマ
+  "terminal.integrated.defaultProfile.windows": "Ubuntu-24.04 (WSL)",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always" // デフォルトターミナル
+}
