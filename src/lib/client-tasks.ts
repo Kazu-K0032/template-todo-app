@@ -29,7 +29,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
  * @param limit ページあたりの件数
  * @returns キャッシュキー
  */
-export const getTasksCacheKey = (accountId: string, page: number, limit: number) => {
+const getTasksCacheKey = (accountId: string, page: number, limit: number): string => {
   return `/api/tasks?accountId=${accountId}&page=${page}&limit=${limit}`;
 };
 
@@ -39,7 +39,11 @@ export const getTasksCacheKey = (accountId: string, page: number, limit: number)
  * @param page ページ番号
  * @param limit ページあたりの件数
  */
-export const revalidateTasks = async (accountId: string, page: number, limit: number) => {
+export const revalidateTasks = async (
+  accountId: string,
+  page: number,
+  limit: number
+): Promise<void> => {
   await mutate(getTasksCacheKey(accountId, page, limit));
 };
 
@@ -106,24 +110,6 @@ export const deleteTask = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * タスクを取得する関数
- * @param accountId タスクを取得するアカウントのID
- * @returns 取得されたタスク
- */
-export const useTasks = (accountId?: string) => {
-  const { data, error, isLoading } = useApi(
-    accountId ? `/api/tasks?accountId=${accountId}` : null,
-    fetcher,
-    { enabled: !!accountId }
-  );
-
-  return {
-    tasks: data?.tasks || [],
-    isLoading,
-    error,
-  };
-};
 
 /**
  * タスクをページネーションで取得する関数

@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { message } from "antd";
-import { createTask, updateTask, deleteTask, useTasksWithPagination, revalidateTasks } from "@/lib/client-tasks";
-import { TodoItem } from "./TodoMemo.types";
+import { useTasksWithPagination } from "@/lib/client-tasks";
+import { useTodoHandlers } from "./useTodoHandlers";
+import type { TodoItem } from "./TodoMemo.types";
 
 interface UseTodoMemoProps {
   accountId?: string;
@@ -34,31 +35,28 @@ export const useTodoMemo = ({
     limit
   );
 
+  const { handleCreate, handleUpdate, handleToggle, handleDelete, handleDeleteCompletedTasks } = useTodoHandlers(
+    accountId,
+    page,
+    limit
+  );
+
 
   /**
    * TODOの完了状態を切り替える
    * @param id TODOのID
    */
   const toggleTodo = async (id: string) => {
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+
     try {
-      const todo = todos.find((t: TodoItem) => t.id === id);
-      if (!todo) return;
-
-      const newStatus = todo.status === "DONE" ? "TODO" : "DONE";
-      await updateTask(id, {
-        status: newStatus,
-      });
-      if (accountId) {
-        await revalidateTasks(accountId, page, limit);
-      }
-
+      await handleToggle(id, todo.status);
     } catch (err) {
       console.error("タスク更新エラー:", err);
       throw err;
     }
   };
-
-
 
   /**
    * TODOの詳細を表示する
@@ -95,17 +93,9 @@ export const useTodoMemo = ({
       message.warning("タイトルを入力してください");
       return;
     }
-    if (!accountId) return;
 
     try {
-      await createTask({
-        title: newTitle,
-        description: newDescription,
-        accountId,
-      });
-      if (accountId) {
-        await revalidateTasks(accountId, page, limit);
-      }
+      await handleCreate(newTitle, newDescription);
       setNewTitle("");
       setNewDescription("");
       message.success("TODOを追加しました");
@@ -113,7 +103,7 @@ export const useTodoMemo = ({
       console.error("タスク作成エラー:", err);
       message.error("TODOの追加に失敗しました");
     }
-  }, [newTitle, newDescription, accountId, page, limit]);
+  }, [newTitle, newDescription, handleCreate]);
 
   const handleEditTodo = useCallback(
     (todo: TodoItem) => {
@@ -129,48 +119,34 @@ export const useTodoMemo = ({
       message.warning("タイトルを入力してください");
       return;
     }
-    if (editingTodo) {
-      try {
-        await updateTask(editingTodo.id, {
-          title: editTitle,
-          description: editDescription,
-        });
-        if (accountId) {
-          await revalidateTasks(accountId, page, limit);
-        }
-        setIsEditModalVisible(false);
-        setEditingTodo(null);
-        message.success("TODOを更新しました");
-      } catch (err) {
-        console.error("タスク更新エラー:", err);
-        message.error("TODOの更新に失敗しました");
-      }
+    if (!editingTodo) return;
+
+    try {
+      await handleUpdate(editingTodo.id, editTitle, editDescription);
+      setIsEditModalVisible(false);
+      setEditingTodo(null);
+      message.success("TODOを更新しました");
+    } catch (err) {
+      console.error("タスク更新エラー:", err);
+      message.error("TODOの更新に失敗しました");
     }
-  }, [editTitle, editDescription, editingTodo, accountId, page, limit]);
+  }, [editTitle, editDescription, editingTodo, handleUpdate]);
 
   const handleDeleteCompleted = useCallback(async () => {
-    const completedCount = todos.filter(
-      (todo: TodoItem) => todo.status === "DONE"
-    ).length;
-    if (completedCount === 0) {
+    const completedTodos = todos.filter((todo: TodoItem) => todo.status === "DONE");
+    if (completedTodos.length === 0) {
       message.info("完了済みのTODOがありません");
       return;
     }
 
     try {
-      const completedTodos = todos.filter((todo: TodoItem) => todo.status === "DONE");
-      await Promise.all(
-        completedTodos.map((todo: TodoItem) => deleteTask(todo.id))
-      );
-      if (accountId) {
-        await revalidateTasks(accountId, page, limit);
-      }
-      message.success(`${completedCount}個の完了済みTODOを削除しました`);
+      const deletedCount = await handleDeleteCompletedTasks(todos);
+      message.success(`${deletedCount}個の完了済みTODOを削除しました`);
     } catch (err) {
       console.error("完了済みタスク削除エラー:", err);
       message.error("完了済みTODOの削除に失敗しました");
     }
-  }, [todos, accountId, page, limit]);
+  }, [todos, handleDeleteCompletedTasks]);
 
   // 完了済みTODO数の計算
   const completedCount = todos.filter((todo: TodoItem) => todo.status === "DONE").length;
@@ -178,10 +154,7 @@ export const useTodoMemo = ({
   // deleteTodo関数を実装
   const deleteTodo = async (id: string) => {
     try {
-      await deleteTask(id);
-      if (accountId) {
-        await revalidateTasks(accountId, page, limit);
-      }
+      await handleDelete(id);
     } catch (err) {
       console.error("タスク削除エラー:", err);
       message.error("TODOの削除に失敗しました");

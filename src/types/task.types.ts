@@ -23,10 +23,6 @@ export interface BaseApiResponse {
   error?: string;
 }
 
-// タスク一覧取得API
-export interface GetTasksResponse extends BaseApiResponse {
-  tasks: TaskType[];
-}
 
 // タスク作成API
 export interface CreateTaskResponse extends BaseApiResponse {
@@ -38,7 +34,3 @@ export interface UpdateTaskResponse extends BaseApiResponse {
   task: TaskType;
 }
 
-// タスク削除API
-export interface DeleteTaskResponse extends BaseApiResponse {
-  // 削除成功時は特にデータなし
-}
