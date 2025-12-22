@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Pagination } from "@/components/ui-elements/Pagination";
+import { Prisma, Task } from "@prisma/client";
 
 type Params = Promise<{ [key: string]: string | string[] | undefined}>
 
@@ -11,28 +12,29 @@ export default async function ChecksPage(props: {
 
   // 1ページあたりの表示数
   const MAX_TASKS_PER_PAGE = 20;
-
   // スキップ数と取得数
   const skip = (page - 1) * MAX_TASKS_PER_PAGE;
 
+  // where条件を型安全にする
+  const whereCondition: Prisma.TaskWhereInput = {
+    deletedAt: null,
+  }
   const totalTasks = await prisma.task.count({
-    where: {
-      deletedAt: null,
-    }
+    where: whereCondition,
   })
 
-  // ページネーション付きでデータ取得
-  const tasks = await prisma.task.findMany({
+  // findManyの引数を型安全にする
+  const findManyArgs: Prisma.TaskFindManyArgs = {
     skip,
     take: MAX_TASKS_PER_PAGE,
-    where: {
-      deletedAt: null,
-    },
+    where: whereCondition,
     orderBy: {
       createdAt: "desc",
     }
-  })
+  }
 
+  // ページネーション付きでデータ取得
+  const tasks: Task[] = await prisma.task.findMany(findManyArgs)
   // 総ページ数を計算
   const totalPages = Math.ceil(totalTasks / MAX_TASKS_PER_PAGE)
 
