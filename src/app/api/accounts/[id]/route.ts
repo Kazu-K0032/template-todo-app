@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseJsonBody } from "@/lib/validations/api-helper";
+import { updateAccountSchema } from "@/lib/validations/account.schemas";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: { id: string };
+}
+
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const account = await prisma.account.findFirst({
       where: {
@@ -39,31 +42,17 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const body = await request.json();
-    const { accountName, icon } = body;
-
-    if (!accountName || !icon) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "アカウント名とアイコンは必須です",
-        },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, updateAccountSchema);
+    if (!parsed.success) return parsed.response;
 
     const updatedAccount = await prisma.account.update({
       where: {
         id: params.id,
       },
       data: {
-        accountName,
-        icon,
+        ...parsed.data,
         updatedAt: new Date(),
       },
     });

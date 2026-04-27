@@ -1,25 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { CreateTaskRequest } from "@/types/task.types";
+import { parseJsonBody, parseSearchParams } from "@/lib/validations/api-helper";
+import {
+  createTaskSchema,
+  taskQuerySchema,
+} from "@/lib/validations/task.schemas";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const accountId = searchParams.get("accountId");
-    // ページ番号
-    const page = parseInt(searchParams.get("page") || "1");
-    // n個/pageで取得する件数
-    const limit = parseInt(searchParams.get("limit") || "8");
+    const parsed = parseSearchParams(searchParams, taskQuerySchema);
+    if (!parsed.success) return parsed.response;
 
-    if (!accountId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "accountIdが必要です",
-        },
-        { status: 400 }
-      );
-    }
+    const { accountId, page, limit } = parsed.data;
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -37,8 +30,8 @@ export async function GET(request: NextRequest) {
       where: {
         accountId,
         deletedAt: null,
-      }
-    })
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -48,7 +41,7 @@ export async function GET(request: NextRequest) {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
-      }
+      },
     });
   } catch (error) {
     console.error("タスク取得エラー:", error);
@@ -64,24 +57,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateTaskRequest = await request.json();
-    const { title, description, accountId } = body;
-
-    if (!title || !description || !accountId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "title, description, accountIdが必要です",
-        },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, createTaskSchema);
+    if (!parsed.success) return parsed.response;
 
     const task = await prisma.task.create({
       data: {
-        title,
-        description,
-        accountId,
+        ...parsed.data,
         status: "TODO",
       },
     });

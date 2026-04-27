@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setSelectedAccountId, clearSelectedAccountId } from "@/lib/cookies";
+import { parseJsonBody } from "@/lib/validations/api-helper";
+import { selectAccountSchema } from "@/lib/validations/account.schemas";
 
 /**
  * アカウント選択API
@@ -8,20 +10,10 @@ import { setSelectedAccountId, clearSelectedAccountId } from "@/lib/cookies";
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { accountId } = body;
+    const parsed = await parseJsonBody(request, selectAccountSchema);
+    if (!parsed.success) return parsed.response;
 
-    if (!accountId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "アカウントIDが必要です",
-        },
-        { status: 400 }
-      );
-    }
-
-    await setSelectedAccountId(accountId);
+    await setSelectedAccountId(parsed.data.accountId);
 
     return NextResponse.json({
       success: true,

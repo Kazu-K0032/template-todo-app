@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { UpdateTaskRequest } from "@/types/task.types";
+import { parseJsonBody } from "@/lib/validations/api-helper";
+import { updateTaskSchema } from "@/lib/validations/task.schemas";
 
 interface RouteParams {
   params: { id: string };
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const task = await prisma.task.findFirst({
       where: {
@@ -44,18 +42,16 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const body: UpdateTaskRequest = await request.json();
+    const parsed = await parseJsonBody(request, updateTaskSchema);
+    if (!parsed.success) return parsed.response;
 
     const task = await prisma.task.update({
       where: {
         id: params.id,
       },
-      data: body,
+      data: parsed.data,
     });
 
     return NextResponse.json({
@@ -74,10 +70,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     // ソフトデリート（deletedAtを設定）
     await prisma.task.update({
