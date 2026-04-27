@@ -53,7 +53,7 @@
 
   /* その他の便利な設定 */
   "breadcrumbs.enabled": true, // ファイルのパンくずリストを表示
-  "workbench.colorTheme": "Default Dark Modern", // テーマ
+  "workbench.colorTheme": "Dark Modern", // テーマ
   "terminal.integrated.defaultProfile.windows": "Ubuntu-24.04 (WSL)",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always" // デフォルトターミナル
