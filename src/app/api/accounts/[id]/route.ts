@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseJsonBody } from "@/lib/validations/api-helper";
+import {
+  parseJsonBody,
+  notFoundResponse,
+  internalErrorResponse,
+} from "@/lib/validations/api-helper";
 import { updateAccountSchema } from "@/lib/validations/account.schemas";
 
 interface RouteParams {
   params: { id: string };
 }
 
+/**
+ * アカウント詳細を取得
+ * @description ID 指定でアカウントを取得する。論理削除済みは除外される。
+ * @pathParams accountIdParamsSchema
+ * @response accountResponseSchema:対象アカウント
+ * @responseSet crud
+ * @tag Accounts
+ * @openapi
+ */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const account = await prisma.account.findFirst({
@@ -17,13 +30,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     });
 
     if (!account) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "アカウントが見つかりません",
-        },
-        { status: 404 }
-      );
+      return notFoundResponse("アカウントが見つかりません");
     }
 
     return NextResponse.json({
@@ -32,16 +39,20 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("アカウント取得エラー:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "アカウントの取得に失敗しました",
-      },
-      { status: 500 }
-    );
+    return internalErrorResponse("アカウントの取得に失敗しました");
   }
 }
 
+/**
+ * アカウントを更新
+ * @description アカウント名とアイコンを更新する。
+ * @pathParams accountIdParamsSchema
+ * @body updateAccountSchema
+ * @response accountResponseSchema:更新後のアカウント
+ * @responseSet crud
+ * @tag Accounts
+ * @openapi
+ */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const parsed = await parseJsonBody(request, updateAccountSchema);
@@ -63,12 +74,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("アカウント更新エラー:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "アカウントの更新に失敗しました",
-      },
-      { status: 500 }
-    );
+    return internalErrorResponse("アカウントの更新に失敗しました");
   }
 }

@@ -1,0 +1,97 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Template Todo App API",
+    "version": "0.1.0",
+    "description": "Todo アプリケーション API のリクエスト・レスポンス仕様。zod スキーマから自動生成。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {}
+  },
+  "defaultResponseSet": "common",
+  "responseSets": {
+    "common": ["400", "500"],
+    "crud": ["400", "404", "500"],
+    "public": ["500"]
+  },
+  "errorConfig": {
+    "template": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": false
+        },
+        "error": {
+          "type": "string",
+          "example": "{{ERROR_MESSAGE}}"
+        },
+        "code": {
+          "type": "string",
+          "example": "{{ERROR_CODE}}"
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          },
+          "description": "VALIDATION_ERROR のときのみ存在"
+        }
+      },
+      "required": ["success", "error", "code"]
+    },
+    "codes": {
+      "400": {
+        "description": "Bad Request - 入力バリデーションに失敗、または不正な JSON ボディ",
+        "variables": {
+          "ERROR_MESSAGE": "入力値が不正です",
+          "ERROR_CODE": "VALIDATION_ERROR"
+        }
+      },
+      "404": {
+        "description": "Not Found - 指定されたリソースが存在しない",
+        "variables": {
+          "ERROR_MESSAGE": "リソースが見つかりません",
+          "ERROR_CODE": "NOT_FOUND"
+        }
+      },
+      "500": {
+        "description": "Internal Server Error - サーバー内部エラー",
+        "variables": {
+          "ERROR_MESSAGE": "サーバー内部エラー",
+          "ERROR_CODE": "INTERNAL_ERROR"
+        }
+      }
+    }
+  },
+  "schemaType": "zod",
+  "schemaFiles": [],
+  "docsUrl": "api-docs",
+  "ui": "none",
+  "outputFile": "openapi.json",
+  "outputDir": "./public",
+  "diagnostics": {
+    "enabled": true
+  },
+  "ignoreRoutes": [],
+  "debug": false,
+  "apiDir": "./src/app/api",
+  "routerType": "app",
+  "schemaDir": "./src/lib/validations",
+  "framework": {
+    "kind": "nextjs",
+    "router": "app"
+  },
+  "next": {},
+  "includeOpenApiRoutes": false
+}

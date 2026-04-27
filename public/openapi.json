@@ -1,0 +1,1174 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Template Todo App API",
+    "version": "0.1.0",
+    "description": "Todo アプリケーション API のリクエスト・レスポンス仕様。zod スキーマから自動生成。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {},
+    "schemas": {
+      "accountIdParamsSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "アカウントID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "accountResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "account": {
+            "$ref": "#/components/schemas/accountSchema"
+          }
+        },
+        "required": [
+          "success",
+          "account"
+        ]
+      },
+      "updateAccountSchema": {
+        "$ref": "#/components/schemas/createAccountSchema"
+      },
+      "accountsListResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/accountSchema"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "accounts"
+        ]
+      },
+      "createAccountSchema": {
+        "type": "object",
+        "properties": {
+          "accountName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "アカウント名（1〜50文字）"
+          },
+          "icon": {
+            "type": "string",
+            "minLength": 1,
+            "description": "アイコン識別子または URL"
+          }
+        },
+        "required": [
+          "accountName",
+          "icon"
+        ]
+      },
+      "selectAccountSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "選択するアカウントのID"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "accountSelectResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "操作結果メッセージ"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "taskIdParamsSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "タスクID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "taskResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "task": {
+            "$ref": "#/components/schemas/taskSchema"
+          }
+        },
+        "required": [
+          "success",
+          "task"
+        ]
+      },
+      "updateTaskSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "タスクのタイトル（1〜100文字）"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "タスクの説明（最大1000文字）"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/taskStatusSchema"
+              }
+            ]
+          }
+        }
+      },
+      "taskDeleteResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "taskQuerySchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "対象アカウントのID"
+          },
+          "page": {
+            "default": 1,
+            "description": "ページ番号（1始まり）",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 8,
+            "description": "1ページあたりの件数（1〜100）",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "accountId",
+          "page",
+          "limit"
+        ]
+      },
+      "tasksListResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/taskSchema"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/paginationSchema"
+          }
+        },
+        "required": [
+          "success",
+          "tasks",
+          "pagination"
+        ]
+      },
+      "createTaskSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "タスクのタイトル（1〜100文字）"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "タスクの説明（最大1000文字、空文字可）"
+          },
+          "accountId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "所属するアカウントのID"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "accountId"
+        ]
+      },
+      "accountSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "アカウントID"
+          },
+          "accountName": {
+            "type": "string",
+            "description": "アカウント名"
+          },
+          "icon": {
+            "type": "string",
+            "description": "アイコン"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新日時"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "論理削除日時（未削除なら null）"
+          }
+        },
+        "required": [
+          "id",
+          "accountName",
+          "icon",
+          "createdAt",
+          "updatedAt",
+          "deletedAt"
+        ]
+      },
+      "apiErrorCodeSchema": {
+        "type": "string",
+        "enum": [
+          "BAD_REQUEST",
+          "VALIDATION_ERROR",
+          "INVALID_JSON",
+          "UNAUTHORIZED",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "CONFLICT",
+          "INTERNAL_ERROR"
+        ]
+      },
+      "validationIssueSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "不正だったフィールドのパス（例: title）"
+          },
+          "message": {
+            "type": "string",
+            "description": "そのフィールドに対するエラーメッセージ"
+          }
+        },
+        "required": [
+          "path",
+          "message"
+        ]
+      },
+      "validationErrorResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "description": "常に false"
+          },
+          "error": {
+            "type": "string",
+            "description": "代表的なエラーメッセージ（先頭の issue を採用）"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_ERROR"
+            ],
+            "description": "エラーコード"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/validationIssueSchema"
+            },
+            "description": "各フィールドのバリデーションエラー一覧"
+          }
+        },
+        "required": [
+          "success",
+          "error",
+          "code",
+          "issues"
+        ]
+      },
+      "invalidJsonErrorResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "リクエストボディが不正なJSONです"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "INVALID_JSON"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "error",
+          "code"
+        ]
+      },
+      "notFoundErrorResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "リソースが見つかりません"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "NOT_FOUND"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "error",
+          "code"
+        ]
+      },
+      "internalErrorResponseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "サーバー内部エラー"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "INTERNAL_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "error",
+          "code"
+        ]
+      },
+      "apiErrorResponseSchema": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/validationErrorResponseSchema"
+          },
+          {
+            "$ref": "#/components/schemas/invalidJsonErrorResponseSchema"
+          },
+          {
+            "$ref": "#/components/schemas/notFoundErrorResponseSchema"
+          },
+          {
+            "$ref": "#/components/schemas/internalErrorResponseSchema"
+          }
+        ]
+      },
+      "successEnvelopeSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "taskStatusSchema": {
+        "type": "string",
+        "description": "タスクの状態"
+      },
+      "taskSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "タスクID"
+          },
+          "accountId": {
+            "type": "string",
+            "description": "所属アカウントID"
+          },
+          "title": {
+            "type": "string",
+            "description": "タイトル"
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "status": {
+            "$ref": "#/components/schemas/taskStatusSchema"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新日時"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "論理削除日時（未削除なら null）"
+          }
+        },
+        "required": [
+          "id",
+          "accountId",
+          "title",
+          "description",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "deletedAt"
+        ]
+      },
+      "paginationSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "現在のページ"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "1ページあたりの件数"
+          },
+          "total": {
+            "type": "integer",
+            "description": "総件数"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "総ページ数"
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "totalPages"
+        ]
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "Bad Request - 入力バリデーションに失敗、または不正な JSON ボディ",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "入力値が不正です"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "400"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "description": "VALIDATION_ERROR のときのみ存在"
+                }
+              },
+              "required": [
+                "success",
+                "error",
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not Found - 指定されたリソースが存在しない",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "リソースが見つかりません"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "404"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "description": "VALIDATION_ERROR のときのみ存在"
+                }
+              },
+              "required": [
+                "success",
+                "error",
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error - サーバー内部エラー",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "サーバー内部エラー"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "500"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "description": "VALIDATION_ERROR のときのみ存在"
+                }
+              },
+              "required": [
+                "success",
+                "error",
+                "code"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/accounts": {
+      "get": {
+        "operationId": "get-accounts",
+        "summary": "アカウント一覧を取得",
+        "description": "削除されていないアカウントを作成日時の昇順で返す。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "アカウント一覧",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountsListResponseSchema"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-accounts",
+        "summary": "アカウントを作成",
+        "description": "アカウントを新規作成する。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createAccountSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "作成されたアカウント",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/accounts/{id}": {
+      "get": {
+        "operationId": "get-accounts-{id}",
+        "summary": "アカウント詳細を取得",
+        "description": "ID 指定でアカウントを取得する。論理削除済みは除外される。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "アカウントID"
+            },
+            "description": "アカウントID",
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "対象アカウント",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-accounts-{id}",
+        "summary": "アカウントを更新",
+        "description": "アカウント名とアイコンを更新する。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "アカウントID"
+            },
+            "description": "アカウントID",
+            "example": "123"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/updateAccountSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新後のアカウント",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/accounts/select": {
+      "post": {
+        "operationId": "post-accounts-select",
+        "summary": "アカウントを選択",
+        "description": "Cookie に選択中アカウントIDを保存する。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/selectAccountSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "選択完了メッセージ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountSelectResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-accounts-select",
+        "summary": "アカウント選択を解除",
+        "description": "Cookie の選択中アカウントIDを削除する。",
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "解除完了メッセージ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accountSelectResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "operationId": "get-tasks",
+        "summary": "タスク一覧を取得",
+        "description": "指定アカウントのタスクをページング付きで取得する",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "accountId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "対象アカウントのID"
+            },
+            "description": "対象アカウントのID"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "default": 1,
+              "description": "ページ番号（1始まり）",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "description": "ページ番号（1始まり）"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "default": 8,
+              "description": "1ページあたりの件数（1〜100）",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "1ページあたりの件数（1〜100）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "タスク一覧とページング情報",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tasksListResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-tasks",
+        "summary": "タスクを作成",
+        "description": "タスクを新規作成する。ステータスは TODO で初期化される。",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createTaskSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "作成されたタスク",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/taskResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "operationId": "get-tasks-{id}",
+        "summary": "タスク詳細を取得",
+        "description": "ID 指定でタスクを取得する。論理削除済みは除外される。",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "タスクID"
+            },
+            "description": "タスクID",
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "対象タスク",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/taskResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-tasks-{id}",
+        "summary": "タスクを更新",
+        "description": "タイトル・説明・ステータスを部分更新する。",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "タスクID"
+            },
+            "description": "タスクID",
+            "example": "123"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/updateTaskSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新後のタスク",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/taskResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-tasks-{id}",
+        "summary": "タスクを削除",
+        "description": "deletedAt を設定する論理削除。",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "タスクID"
+            },
+            "description": "タスクID",
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "削除完了",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/taskDeleteResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "Tasks"
+    }
+  ]
+}

@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseJsonBody, parseSearchParams } from "@/lib/validations/api-helper";
+import {
+  parseJsonBody,
+  parseSearchParams,
+  internalErrorResponse,
+} from "@/lib/validations/api-helper";
 import {
   createTaskSchema,
   taskQuerySchema,
 } from "@/lib/validations/task.schemas";
 
+/**
+ * タスク一覧を取得
+ * @description 指定アカウントのタスクをページング付きで取得する
+ * @params taskQuerySchema
+ * @response tasksListResponseSchema:タスク一覧とページング情報
+ * @responseSet common
+ * @tag Tasks
+ * @openapi
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -45,16 +58,19 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("タスク取得エラー:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "タスクの取得に失敗しました",
-      },
-      { status: 500 }
-    );
+    return internalErrorResponse("タスクの取得に失敗しました");
   }
 }
 
+/**
+ * タスクを作成
+ * @description タスクを新規作成する。ステータスは TODO で初期化される。
+ * @body createTaskSchema
+ * @response 201:taskResponseSchema:作成されたタスク
+ * @responseSet common
+ * @tag Tasks
+ * @openapi
+ */
 export async function POST(request: NextRequest) {
   try {
     const parsed = await parseJsonBody(request, createTaskSchema);
@@ -67,18 +83,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      task,
-    });
-  } catch (error) {
-    console.error("タスク作成エラー:", error);
     return NextResponse.json(
       {
-        success: false,
-        error: "タスクの作成に失敗しました",
+        success: true,
+        task,
       },
-      { status: 500 }
+      { status: 201 }
     );
+  } catch (error) {
+    console.error("タスク作成エラー:", error);
+    return internalErrorResponse("タスクの作成に失敗しました");
   }
 }

@@ -1,0 +1,33 @@
+{
+  "configPath": "/home/kuji/development/template-todo-app/next.openapi.json",
+  "outputFile": "/home/kuji/development/template-todo-app/public/openapi.json",
+  "diagnostics": [],
+  "performance": {
+    "prepareTemplateMs": 0.1995959999999286,
+    "loadCustomFragmentsMs": 0.0011600000000271393,
+    "prepareDocumentMs": 0.20075599999995575,
+    "scanRouteFilesMs": 0.6228170000000546,
+    "deriveRoutePathMs": 0.3976359999998067,
+    "filterRouteCandidatesMs": 0.04021899999997913,
+    "sourcePrecheckMs": 0.45737199999973654,
+    "readRouteFilesMs": 0.24112700000023324,
+    "parseRouteFilesMs": 29.781460999999922,
+    "analyzeRouteFilesMs": 21.705790999999977,
+    "typescriptResponseInferenceMs": 0,
+    "processRouteFilesMs": 51.85289100000023,
+    "registerRouteMs": 195.5702309999998,
+    "getSchemaContentMs": 137.65570100000036,
+    "createRequestParamsMs": 1.0350699999994504,
+    "createRequestBodyMs": 0,
+    "processResponsesMs": 54.82405899999981,
+    "createResponseSchemaMs": 0,
+    "buildOperationsMs": 195.69643900000017,
+    "sortAndMergePathsMs": 1.3594510000000355,
+    "buildPathsMs": 1.3594510000000355,
+    "defaultComponentsAndErrorsMs": 0.420757999999978,
+    "mergeSchemasMs": 1.0251960000000508,
+    "finalizeDocumentMs": 8.03412900000012,
+    "totalMs": 261.01101700000004,
+    "scanRoutesMs": 248.17214700000045
+  }
+}
