@@ -1,4 +1,4 @@
-import { Account } from "@prisma/client";
+import type { Account } from "@/generated/prisma/client";
 
 // アカウント関連の型定義
 export type AccountType = Account;

@@ -12,7 +12,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { message } from "antd";
-import { TaskStatus } from "@prisma/client";
+import { TaskStatus } from "@/generated/prisma/enums";
 import { useAccount } from "../../contexts/account-context";
 import { AccountProvider } from "../../contexts/account-context";
 import { useTodoMemo } from "./useTodoMemo";

@@ -1,4 +1,4 @@
-import { Account } from "@prisma/client";
+import type { Account } from "@/generated/prisma/client";
 
 export const mockAccounts: Account[] = [
   {

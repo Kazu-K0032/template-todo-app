@@ -39,3 +39,6 @@ next-env.d.ts
 
 .swc/
 mcp.json
+
+# prisma generated client
+/src/generated/

@@ -1,4 +1,5 @@
-import { Task, TaskStatus } from "@prisma/client";
+import type { Task } from "@/generated/prisma/client";
+import { TaskStatus } from "@/generated/prisma/enums";
 
 // タスク関連の型定義
 export type TaskType = Task;

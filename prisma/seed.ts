@@ -1,8 +1,15 @@
-import { PrismaClient } from "@prisma/client";
+import { config } from "dotenv";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
+import { PrismaClient } from "../src/generated/prisma/client";
 
-const prisma = new PrismaClient();
+config();
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 シードデータの作成を開始...");

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Account } from "@prisma/client";
+import type { Account } from "@/generated/prisma/client";
 import { accountClient } from "@/lib/client-account";
 
 const SELECTED_ACCOUNT_KEY = "selectedAccountId";

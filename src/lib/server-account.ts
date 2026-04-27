@@ -1,6 +1,6 @@
 import { getSelectedAccountId } from "./cookies";
 import { prisma } from "./prisma";
-import { Account } from "@prisma/client";
+import type { Account } from "@/generated/prisma/client";
 
 /**
  * サーバーサイドで選択されたアカウント情報を取得
