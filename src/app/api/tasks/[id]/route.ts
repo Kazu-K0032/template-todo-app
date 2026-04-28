@@ -8,7 +8,7 @@ import {
 import { updateTaskSchema } from "@/lib/validations/task.schemas";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -22,9 +22,10 @@ interface RouteParams {
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const task = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id,
         deletedAt: null,
       },
     });
@@ -58,9 +59,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const parsed = await parseJsonBody(request, updateTaskSchema);
     if (!parsed.success) return parsed.response;
 
+    const { id } = await params;
     const task = await prisma.task.update({
       where: {
-        id: params.id,
+        id,
       },
       data: parsed.data,
     });
@@ -86,9 +88,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     await prisma.task.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         deletedAt: new Date(),

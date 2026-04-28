@@ -8,7 +8,7 @@ import {
 import { updateAccountSchema } from "@/lib/validations/account.schemas";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -22,9 +22,10 @@ interface RouteParams {
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const account = await prisma.account.findFirst({
       where: {
-        id: params.id,
+        id,
         deletedAt: null,
       },
     });
@@ -58,9 +59,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const parsed = await parseJsonBody(request, updateAccountSchema);
     if (!parsed.success) return parsed.response;
 
+    const { id } = await params;
     const updatedAccount = await prisma.account.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         ...parsed.data,
