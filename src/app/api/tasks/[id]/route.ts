@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type { UpdateTaskRequest } from "@/types/task.types";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(
@@ -11,9 +11,10 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
+    const { id } = await params;
     const task = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id,
         deletedAt: null,
       },
     });
@@ -51,9 +52,10 @@ export async function PUT(
   try {
     const body: UpdateTaskRequest = await request.json();
 
+    const { id } = await params;
     const task = await prisma.task.update({
       where: {
-        id: params.id,
+        id,
       },
       data: body,
     });
@@ -80,9 +82,10 @@ export async function DELETE(
 ) {
   try {
     // ソフトデリート（deletedAtを設定）
+    const { id } = await params;
     await prisma.task.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         deletedAt: new Date(),

@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const account = await prisma.account.findFirst({
       where: {
-        id: params.id,
+        id,
         deletedAt: null,
       },
     });
@@ -39,10 +41,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const body = await request.json();
     const { accountName, icon } = body;
@@ -57,9 +56,10 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const updatedAccount = await prisma.account.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         accountName,
