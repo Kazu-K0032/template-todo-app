@@ -77,7 +77,7 @@
   "schemaType": "zod",
   "schemaFiles": [],
   "docsUrl": "api-docs",
-  "ui": "none",
+  "ui": "scalar",
   "outputFile": "openapi.json",
   "outputDir": "./public",
   "diagnostics": {

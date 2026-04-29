@@ -20,6 +20,7 @@
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@scalar/nextjs-api-reference": "^0.10.11",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "antd": "^5.27.4",
